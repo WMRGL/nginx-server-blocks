@@ -1,4 +1,4 @@
-# nginx-server-blocks (UNTESTED)
+# nginx-server-blocks
 How to set up a single server for use with multiple Django web applications via Nginx server blocks.
 
 ## Notes
@@ -228,7 +228,7 @@ server {
 
         # Try to serve static files from nginx
         if (!-f $request_filename) {
-            proxy_pass http://hello_app_server;
+            proxy_pass http://<application_name>_server;
             break;
         }
     }
@@ -246,4 +246,4 @@ server {
 }
 ```
 
-With gunicorn and nginx running, the webapp should now be accessible at the IP and port specified.
+Once this file is written, symlink it into the active config directory for Nginx defined in `nginx.conf`. With gunicorn and nginx running, the webapp should now be accessible at the IP and port specified. 
