@@ -246,4 +246,11 @@ server {
 }
 ```
 
-Once this file is written, symlink it into the active config directory for Nginx defined in `nginx.conf`. With gunicorn and nginx running, the webapp should now be accessible at the IP and port specified. 
+Once this file is written, symlink it into the active config directory for Nginx defined in `nginx.conf`:
+
+```bash
+$ sudo ln -s /etc/nginx/sites-available/<application_name> <nginx_conf_dir>.conf
+$ sudo nginx -s reload
+```
+
+With gunicorn and nginx running, the webapp should now be accessible at the IP and port specified. 
