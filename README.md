@@ -56,6 +56,10 @@ $ sudo usermod -a -G supervisor `whoami`
 
 3. Start Nginx
 ```bash
+
+sudo firewall-cmd --permanent --zone=public --add-port=80/tcp
+sudo firewall-cmd --reload
+
 sudo service nginx start
 ```
 
