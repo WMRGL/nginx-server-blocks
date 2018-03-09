@@ -1,4 +1,4 @@
-# nginx-server-blocks
+# nginx-server-blocks (UNTESTED)
 How to set up a single server for use with multiple Django web applications via Nginx server blocks.
 
 ## Notes
