@@ -74,7 +74,7 @@ include /etc/nginx/conf.d/*.conf;
 # -- OR --
 include etc/nginx/sites-enabled/*.conf;
 
-# whichever of these is being included, use this for the symlink when adding new applications.
+# whichever of these is being included, use this for the symlink when adding new applications. Enabled application config files should symlink to here.
 ```
 
 NOTE: all group changes require a new login to set groups.
