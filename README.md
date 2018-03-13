@@ -31,7 +31,7 @@ $ sudo vim /etc/supervisord.conf
 ;chown=root:supervisor
 
 # alter [include]:
-files = supervisord.d/*.ini supervisor.d/*.conf
+files = supervisord.d/*.ini supervisord.d/*.conf
 ```
 #### Nginx: 
 ```bash
@@ -62,6 +62,7 @@ sudo firewall-cmd --reload
 
 sudo service nginx start
 ```
+These commands should be re-run for every port you want to use.
 
 Test that  Nginx has initialised correctly and is running by navigation to the IP of the server. It should display an Nginx welcome page. Additionally, ensure that the Nginx config is set up for adding applications:
 
@@ -69,12 +70,12 @@ Test that  Nginx has initialised correctly and is running by navigation to the I
 # if you do not have the following directory, make it:
 $ sudo mkdir /etc/nginx/sites-available
 
-# additionally, check that these directories are being loaded in /etc/nginx/nginx.conf:
+# additionally, check that one of the following lines is present within /etc/nginx/nginx.conf:
 include /etc/nginx/conf.d/*.conf;
 # -- OR --
-include etc/nginx/sites-enabled/*.conf;
+include /etc/nginx/sites-enabled/*.conf;
 
-# whichever of these is being included, use this for the symlink when adding new applications. Enabled application config files should symlink to here.
+# whichever of these is being included, use this for the symlink when adding new applications (will do this in the last step of this procedure). Enabled application config files should symlink to here.
 ```
 
 NOTE: all group changes require a new login to set groups.
@@ -94,11 +95,15 @@ $ sudo chown <user_name> /srv/<application_name>
 ```bash
 $ su - <user_name>
 $ virtualenv --python=/usr/bin/python[2.7|3.6] .
-$ source bin/activate  # enter the venv
-(<application_name>) $
+$ source bin/activate  # to enter the venv
+
+# If the project has a requirements.txt file, run:
+(<application_name>) $ pip install -r requirements.txt
+
+# If not, pip install each required module into the virtualenv.
 ```
 
-3. Add the Django project to the $HOME directory.
+3. Add the Django project to the $HOME directory (e.g. through git clone).
 
 4. Install gunicorn to the virtual environment.
 ```bash
@@ -192,7 +197,7 @@ $ sudo supervisorctl restart <application_name>
 <application_name>: started
 ```
 
-8. Set up the Nginx virtual server configuration for the application. The following file should be created at `/etc/nginx/sites-available/<application_name>`:
+8. Set up the Nginx virtual server configuration for the application. The following file should be created at `/etc/nginx/sites-available/<application_name>.conf`:
 
 ```bash
 upstream <application_name>_server {
@@ -249,12 +254,15 @@ server {
     }
 }
 ```
+If the Django project does not have static/media directories, the corresponding sections can be removed.
 
-Once this file is written, symlink it into the active config directory for Nginx defined in `nginx.conf`:
+Once this file is written, symlink it into the active config directory for Nginx defined in `nginx.conf` (either /etc/nginx/conf.d/ or /etc/nginx/sites-enabled/):
 
 ```bash
-$ sudo ln -s /etc/nginx/sites-available/<application_name> <nginx_conf_dir>.conf
+$ sudo ln -s /etc/nginx/sites-available/<application_name>.conf <nginx_conf_dir>/<application_name>.conf
 $ sudo nginx -s reload
 ```
 
 With gunicorn and nginx running, the webapp should now be accessible at the IP and port specified. 
+
+Troubleshooting: check log files (<application_name>/logs/), check file permissions and double check files created in this procedure.
