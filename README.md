@@ -218,7 +218,7 @@ server {
     error_log /srv/<application_name>/logs/nginx-error.log;
  
     location /static/ {
-        alias   <django_app_static_dir>;
+        alias   /srv/<application_name>/static/;
     }
     
     location /media/ {
@@ -254,7 +254,7 @@ server {
     }
 }
 ```
-If the Django project does not have static/media directories, the corresponding sections can be removed.
+If the Django project does not have static/media directories, the corresponding sections should be fully removed.
 
 Once this file is written, symlink it into the active config directory for Nginx defined in `nginx.conf` (either /etc/nginx/conf.d/ or /etc/nginx/sites-enabled/):
 
@@ -266,3 +266,20 @@ $ sudo nginx -s reload
 With gunicorn and nginx running, the webapp should now be accessible at the IP and port specified. 
 
 Troubleshooting: check log files (<application_name>/logs/), check file permissions and double check files created in this procedure.
+
+9. Serve Django static files to Nginx. Within your Django settings file, add the following line (it can be anywhere, but it is suggested to place it above `STATIC_URL = '/static/'`):
+
+```Python
+STATIC_ROOT = '/srv/<application_name>/static/
+```
+
+Once this is done, run the following commands:
+
+```bash
+cd ~  # should be /srv/<application_name>, if not: switch to the application user
+source bin/activate
+cd <django_dir>
+python manage.py collectstatic
+```
+
+All of the static files created during application development (mostly CSS and Javascript) should now be in your `STATIC_ROOT` folder, which Nginx points to.
