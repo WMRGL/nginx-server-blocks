@@ -93,24 +93,23 @@ $ sudo chown <user_name> /srv/<application_name>
 2. Set up a virtual environment for the application. 
 
 ```bash
-$ su - <user_name>
+$ (sudo) su - <user_name>
 $ virtualenv --python=/usr/bin/python[2.7|3.6] .
 $ source bin/activate  # to enter the venv
 
+# Add the Django project to the $HOME directory (e.g. through git clone)
 # If the project has a requirements.txt file, run:
 (<application_name>) $ pip install -r requirements.txt
 
 # If not, pip install each required module into the virtualenv.
 ```
 
-3. Add the Django project to the $HOME directory (e.g. through git clone).
-
-4. Install gunicorn to the virtual environment.
+3. Install gunicorn to the virtual environment.
 ```bash
 (<application_name>) $ pip install gunicorn
 ```
 
-5. Create a script to start gunicorn so it will serve the dynamic content of the app, then set the script as executable.
+4. Create a script to start gunicorn so it will serve the dynamic content of the app, then set the script as executable.
 ```bash
 (<application_name>) $ touch bin/gunicorn_start
 (<application_name>) $ deactivate
@@ -118,7 +117,7 @@ $ logout
 $ sudo chmod u+x /srv/<application_name>/bin/gunicorn_start
 ```
 
-6. Write the following to `gunicorn_start`:
+5. Write the following to `gunicorn_start`:
 ```bash
 #!/bin/bash
 
@@ -133,7 +132,7 @@ NUM_WORKERs=3  # should be 2 * # CPUs + 1
 # NB: <django_project_name> differs from <application_name>; it is set when running 'django-admin startproject'
 DJANGO_SETTINGS_MODULE=<django_project_name>.settings  # by default; this is project-dependent
 DJANGO_WSGI_MODULE=<django_project_name>.wsgi
-
+# TIMEOUT=300 # add if you have steps which are likely to take longer than 30 seconds.
 
 echo "Starting $NAME as `whoami`."
 
@@ -151,6 +150,7 @@ test -d $RUNDIR || mkdir -p $RUNDIR
 exec $GUNICORN ${DJANGO_WSGI_MODULE}:application \  
   --name $NAME \
   --workers $NUM_WORKERS \
+  # --timeout $TIMEOUT \ # add if you have steps which are likely to take longer than 30 seconds.
   --user=$USER --group=$GROUP \
   --bind=unix:$SOCKFILE \
   --log-level=debug \
@@ -159,7 +159,7 @@ exec $GUNICORN ${DJANGO_WSGI_MODULE}:application \
 
 Check that the script can execute without error by running `bin/gunicorn_start`.
 
-7. Create a program config file to allow supervisor to manage starting, automatic rebooting on failure, and starting on system start. Expected outcome is the running of the webapp's server by gunicorn.
+6. Create a program config file to allow supervisor to manage starting, automatic rebooting on failure, and starting on system start. Expected outcome is the running of the webapp's server by gunicorn.
 
 ```bash
 $ sudo vim /etc/supervisord.d/<application_name>.conf
@@ -197,7 +197,7 @@ $ sudo supervisorctl restart <application_name>
 <application_name>: started
 ```
 
-8. Set up the Nginx virtual server configuration for the application. The following file should be created at `/etc/nginx/sites-available/<application_name>.conf`:
+7. Set up the Nginx virtual server configuration for the application. The following file should be created at `/etc/nginx/sites-available/<application_name>.conf`:
 
 ```bash
 upstream <application_name>_server {
@@ -234,6 +234,8 @@ server {
 
         proxy_set_header Host $http_host;
         proxy_redirect off;
+        # proxy_connect_timeout 75s; # add if you have steps which are likely to take longer than 30 seconds.
+        # proxy_read_timeout 300s; # add if you have steps which are likely to take longer than 30 seconds.
 
         # Try to serve static files from nginx
         if (!-f $request_filename) {
@@ -267,7 +269,7 @@ With gunicorn and nginx running, the webapp should now be accessible at the IP a
 
 Troubleshooting: check log files (<application_name>/logs/), check file permissions and double check files created in this procedure.
 
-9. Serve Django static files to Nginx. Within your Django settings file, add the following line (it can be anywhere, but it is suggested to place it above `STATIC_URL = '/static/'`):
+8. Serve Django static files to Nginx. Within your Django settings file, add the following line (it can be anywhere, but it is suggested to place it above `STATIC_URL = '/static/'`):
 
 ```Python
 STATIC_ROOT = '/srv/<application_name>/static/
