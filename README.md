@@ -267,6 +267,13 @@ $ sudo nginx -s reload
 
 With gunicorn and nginx running, the webapp should now be accessible at the IP and port specified. 
 
+Remember to open the specified port on the firewall if this has not already been done:
+
+```bash
+sudo firewall-cmd --permanent --zone=public --add-port=<port number>/tcp
+sudo firewall-cmd --reload
+```
+
 Troubleshooting: check log files (<application_name>/logs/), check file permissions and double check files created in this procedure.
 
 8. Serve Django static files to Nginx. Within your Django settings file, add the following line (it can be anywhere, but it is suggested to place it above `STATIC_URL = '/static/'`):
