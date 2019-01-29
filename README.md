@@ -128,7 +128,7 @@ DJANGODIR=/srv/<application_name>/<django_project_directory>
 SOCKFILE=/srv/<application_name>/run/gunicorn.sock
 USER=<user_name>
 GROUP=webapps
-NUM_WORKERs=3  # should be 2 * # CPUs + 1
+NUM_WORKERS=3  # should be 2 * # CPUs + 1
 # NB: <django_project_name> differs from <application_name>; it is set when running 'django-admin startproject'
 DJANGO_SETTINGS_MODULE=<django_project_name>.settings  # by default; this is project-dependent
 DJANGO_WSGI_MODULE=<django_project_name>.wsgi
@@ -147,7 +147,7 @@ RUNDIR=$(dirname $SOCKFILE)
 test -d $RUNDIR || mkdir -p $RUNDIR
 
 # start Django Unicorn
-exec $GUNICORN ${DJANGO_WSGI_MODULE}:application \  
+exec $GUNICORN ${DJANGO_WSGI_MODULE}:application \
   --name $NAME \
   --workers $NUM_WORKERS \
   # --timeout $TIMEOUT \ # add if you have steps which are likely to take longer than 30 seconds.
