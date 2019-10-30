@@ -21,23 +21,27 @@ $ sudo pip install virtualenv
 - Install and set permissions for accessing socket files
 ```bash
 $ sudo yum install supervisor
-
+```
 - Edit the config file to (a) provide access to socket files, and (b) set up individual program files.
 ```bash
 $ sudo vim /etc/supervisord.conf
+```
+- Alter `[unix_http_server]`:
 
-# alter [unix_http_server]:
+```bash
 ;chmod=0766
 ;chown=root:supervisor
+```
 
-# alter [include]:
+- Alter `[include]`:
+```bash
 files = supervisord.d/*.ini supervisord.d/*.conf
 ```
+
 #### Nginx: 
 ```bash
 $ sudo yum install nginx
 ```
-
 
 ## Environment set-up
 
@@ -128,7 +132,7 @@ DJANGODIR=/srv/<application_name>/<django_project_directory>
 SOCKFILE=/srv/<application_name>/run/gunicorn.sock
 USER=<user_name>
 GROUP=webapps
-NUM_WORKERs=3  # should be 2 * # CPUs + 1
+NUM_WORKERS=3  # should be 2 * # CPUs + 1
 # NB: <django_project_name> differs from <application_name>; it is set when running 'django-admin startproject'
 DJANGO_SETTINGS_MODULE=<django_project_name>.settings  # by default; this is project-dependent
 DJANGO_WSGI_MODULE=<django_project_name>.wsgi
