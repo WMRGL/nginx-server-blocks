@@ -151,7 +151,7 @@ RUNDIR=$(dirname $SOCKFILE)
 test -d $RUNDIR || mkdir -p $RUNDIR
 
 # start Django Unicorn
-exec $GUNICORN ${DJANGO_WSGI_MODULE}:application \  
+exec $GUNICORN ${DJANGO_WSGI_MODULE}:application \
   --name $NAME \
   --workers $NUM_WORKERS \
   # --timeout $TIMEOUT \ # add if you have steps which are likely to take longer than 30 seconds.
@@ -271,12 +271,19 @@ $ sudo nginx -s reload
 
 With gunicorn and nginx running, the webapp should now be accessible at the IP and port specified. 
 
+Remember to open the specified port on the firewall if this has not already been done:
+
+```bash
+sudo firewall-cmd --permanent --zone=public --add-port=<port number>/tcp
+sudo firewall-cmd --reload
+```
+
 Troubleshooting: check log files (<application_name>/logs/), check file permissions and double check files created in this procedure.
 
 8. Serve Django static files to Nginx. Within your Django settings file, add the following line (it can be anywhere, but it is suggested to place it above `STATIC_URL = '/static/'`):
 
 ```Python
-STATIC_ROOT = '/srv/<application_name>/static/
+STATIC_ROOT = '/srv/<application_name>/static/'
 ```
 
 Once this is done, run the following commands:
